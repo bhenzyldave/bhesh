@@ -1,2 +1,2 @@
-# bhesh
-A random shell that nobody cares about.
+# bhesh 💫
+- 🐚 A random shell that nobody cares about.

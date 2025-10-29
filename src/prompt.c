@@ -46,10 +46,11 @@ Prompt *displayShell(char * promptCursor, Shell * shell)
     if (cwd == NULL)
     {
         perror("Failed to fetch current directory (prompt.c: get_curr_dir()) ->");
-        free(cwd);
         Shell_cleanup(shell);
         exit(EXIT_FAILURE);
     }
+
+    if (strcmp(cwd, shell->home_dir) == 0) cwd = "~";
 
     // Note: +3 for [] and null terminator -> "\n"
     char * promptCurrent = malloc((strlen(cwd) + strlen(promptCursor) + 3));
@@ -75,6 +76,5 @@ Prompt *displayShell(char * promptCursor, Shell * shell)
 
     printf("%s", prompt->memPrompt);
     free(promptCurrent);
-    free(cwd);
     return prompt;
 }

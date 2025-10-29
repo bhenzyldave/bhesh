@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
+#include <unistd.h>
 
 #include "bhesh.h"
 #include "prompt.h"
@@ -9,30 +10,22 @@
 int Shell_init(Shell *self)
 {
 #if defined(_WIN32) || defined(_WIN64)
-    self->os_type = 0;
+    self->home_dir = getenv("HOMEDRIVER")
 #elif defined(__linux__)
-    self->os_type = 1;
+    self->home_dir = getenv("HOME");
 #elif defined(__APPLE__) && define(__MACH__)
-    self->os_type = 2;
+    self->home_dir = getenv("HOME");
 #else
     perror("Unknown operating system!\n");
     return 1;
 #endif
 
-    switch (self->os_type)
-    {
-    case 0:
-        self->home_dir = getenv("HOMEDRIVER");
-        break;
-    case 1:
-        break;
-    case 2:
-        break;
-    }
+        chdir(self->home_dir);
 
-    // self->home_directory;
     self->commands = malloc(INITIAL_MAX_COMMANDS * sizeof(char));
     self->prompt = displayShell(" >", self);
+
+    return 0;
 }
 
 int Shell_loop(Shell *self)
@@ -40,10 +33,15 @@ int Shell_loop(Shell *self)
     size_t curr_command_size = INITIAL_MAX_COMMANDS;
     while (true)
     {
-        bool r = getCommands(&self->commands, curr_command_size);
-        if (r)
+        bool fetchResult = fetchInput(&self->commands, &curr_command_size);
+
+        if (fetchResult)
             return 1;
-        handleCommands(&self->commands);
+
+        Command *cmds = getCommands(self);
+
+        if (cmds == NULL)
+            return 1;
 
         displayShell(" >", self);
     }

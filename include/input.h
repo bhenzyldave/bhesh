@@ -2,8 +2,13 @@
 #define INPUT_H
 
 #include <stdbool.h>
+#include "datastructs.h"
 
-bool getCommands(char ** commands, size_t cmd_size);
-void handleCommands(char ** commands);
+bool fetchInput(char ** commands, size_t * cmd_size);
+Command * getCommands(Shell * shell);
+void handleCommands(Command cmd);
+bool isSystem(char * target);
+bool getTarget(Shell * shell, Command * cmd);
+bool getArgs(Shell * shell, Command * cmd);
 
 #endif

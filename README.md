@@ -12,14 +12,14 @@
 __bhesh__ is a simple shell written in C, the purpose of this creation is merely for personal practice purposes and experience to learn and enhance the repository owner's skills and prepare for future workloads. It is a humble small shell that you may configure or play with in however way you prefer.
 
 ## Installation ⚒️
-Due to that __bhesh__ is not associated in any linux repository, you may have to manually build it from source or use the pre-compiled binaries on Release tag (It may not be available for the time being). To install __bhesh__ on your personal computer, you need to execute certain commands:
+Due to that __bhesh__ is not associated in any linux repository, so you may have to manually build it from source or use the pre-compiled binaries on Release tag (It may not be available for the time being). To install __bhesh__ on your personal computer, you need to execute certain commands:
 
 ### Manual Installation ⚙️
-[!IMPORTANT] Make sure your have `Git` installed on your PC
+##### Make sure your have `Git` installed on your PC
 ```
 git clone https://github.com/bhenzyldave/bhesh.git
 ```
-[!IMPORTANT] Make sure you have `Cmake` installed on your system.
+##### Make sure you have `Cmake` installed on your system.
 Then, make sure you are in the __../bhesh__ folder as copied and run:
 ```
 cmake -S . -B build

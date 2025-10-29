@@ -6,7 +6,9 @@
 int main()
 {
     Shell shell;
-    Shell_init(&shell);
+    int r1 = Shell_init(&shell);
+    if (r1) return 1;
+    
     Shell_loop(&shell);
     Shell_cleanup(&shell);
     return 0;

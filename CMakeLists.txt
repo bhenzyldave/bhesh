@@ -10,4 +10,9 @@ set(SOURCES
    src/prompt.c
 )
 
+add_custom_target(clean-all
+   COMMAND ${CMAKE_COMMAND} -E rm -rf ${CMAKE_BINARY_DIR}/*
+   COMMENT "Cleaning all build files"
+)
+
 add_executable(bhesh ${SOURCES})

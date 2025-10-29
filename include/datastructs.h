@@ -9,8 +9,10 @@ typedef struct {
 } Prompt;
 
 typedef struct {
-   char * commands;
-   Prompt * prompt;
+    int os_type;
+    char * home_dir;
+    char * commands;
+    Prompt * prompt;
 } Shell;
 
 #endif

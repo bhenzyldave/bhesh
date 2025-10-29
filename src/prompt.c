@@ -39,7 +39,7 @@ char * get_curr_dir()
     return cwd;
 }
 
-Prompt *displayPrompt(char * promptCursor, Shell * shell)
+Prompt *displayShell(char * promptCursor, Shell * shell)
 {
     char * cwd = get_curr_dir(); 
     

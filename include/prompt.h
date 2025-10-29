@@ -3,7 +3,7 @@
 
 #include "datastructs.h"
 
-Prompt * displayPrompt(char * promptInitial, Shell * shell);
+Prompt * displayShell(char * promptInitial, Shell * shell);
 char * get_curr_dir();
 
 #endif

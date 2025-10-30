@@ -12,7 +12,10 @@ typedef struct
 typedef struct
 {
     char * target;
+    int target_size;
+
     char ** args;
+    int args_size;
 } Command;
 
 typedef struct

@@ -1,1 +1,1 @@
-valgrind --leak-check=full --track-origins=yes build/bhesh
+valgrind --leak-check=full --max-stackframe=1048576 --num-callers=20 --track-origins=yes build/bhesh

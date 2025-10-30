@@ -20,10 +20,10 @@ int Shell_init(Shell *self)
     return 1;
 #endif
 
-        chdir(self->home_dir);
+        chdir(&*self->home_dir);
 
     self->commands = malloc(INITIAL_MAX_COMMANDS * sizeof(char));
-    self->prompt = displayShell(" >", self);
+    self->prompt = displayShell("-> ", self);
 
     return 0;
 }
@@ -33,7 +33,7 @@ int Shell_loop(Shell *self)
     size_t curr_command_size = INITIAL_MAX_COMMANDS;
     while (true)
     {
-        bool fetchResult = fetchInput(&self->commands, &curr_command_size);
+        bool fetchResult = fetchInput(self->commands, &curr_command_size);
 
         if (fetchResult)
             return 1;

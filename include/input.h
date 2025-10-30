@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include "datastructs.h"
 
-bool fetchInput(char ** commands, size_t * cmd_size);
+bool fetchInput(char * commands, size_t * cmd_size);
 Command * getCommands(Shell * shell);
 void handleCommands(Command cmd);
 bool isSystem(char * target);

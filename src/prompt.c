@@ -16,7 +16,7 @@ char *get_curr_dir()
 
     while (true)
     {
-        cwd = malloc(size * sizeof(char));
+        cwd = malloc(size);
 
         if (cwd == NULL)
         {
@@ -35,7 +35,8 @@ char *get_curr_dir()
     return cwd;
 }
 
-Prompt *displayShell(char *promptCursor, Shell *shell)
+// c1 & c2 refers to the brackets
+Prompt *displayShell(char *promptCursor, Shell *shell, char c1, char c2)
 {
     char *cwd = get_curr_dir();
 
@@ -48,18 +49,18 @@ Prompt *displayShell(char *promptCursor, Shell *shell)
 
     if (strcmp(cwd, shell->home_dir) == 0)
     {
-        cwd = realloc(cwd, sizeof(char) * 2);
+        cwd = realloc(cwd, 2);
         cwd[0] = '~';
         cwd[1] = '\0';
     }
 
     // Note: +3 for [] and null terminator -> "\n"
     char *promptCurrent = malloc((strlen(cwd) + strlen(promptCursor) + 3));
-    sprintf(promptCurrent, "[%s]%s", cwd, promptCursor);
+    sprintf(promptCurrent, "%c%s%c%s", c1, cwd, c2, promptCursor);
 
     // Note: +1 for null terminator -> "\n" from sprintf()
     Prompt *prompt = malloc(sizeof(Prompt));
-    prompt->memPrompt = malloc(strlen(promptCurrent) * sizeof(char) + 1);
+    prompt->memPrompt = malloc(strlen(promptCurrent) + 1);
 
     if (prompt->memPrompt == NULL)
     {

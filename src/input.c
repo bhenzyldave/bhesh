@@ -51,7 +51,14 @@ Command *getCommands(Shell *shell)
     }
 
     bool gT = getTarget(shell, cmds);
+
+    printf("%d\n", cmds->target_size);
+
     bool gA = getArgs(shell, cmds);
+
+    printf("%d\n", cmds->args_size);
+
+    return cmds;
 
     if (gT || gA)
     {
@@ -65,7 +72,7 @@ Command *getCommands(Shell *shell)
 bool getTarget(Shell *shell, Command *cmd)
 {
     int target_size = 2; // 2 as 1 for first char of shell->commands and '\0'
-    cmd->target = malloc(sizeof(char) * target_size);
+    cmd->target = malloc(target_size);
 
     if (cmd->target == NULL)
     {
@@ -78,13 +85,14 @@ bool getTarget(Shell *shell, Command *cmd)
 
     while (true)
     {
-        char c = shell->commands[j]; // Current char
+        char c = shell->commands[j++]; // Current char
 
         if (c == '\0' || c == '\n' || c == ' ' || !c)
         {
             if (c == ' ' && i == 0)
             {
                 j++;
+                continue;
             }
 
             break;
@@ -92,7 +100,7 @@ bool getTarget(Shell *shell, Command *cmd)
 
         if (i >= target_size - 1)
         {
-            cmd->target = realloc(cmd->target, sizeof(char) * (target_size *= 2));
+            cmd->target = realloc(cmd->target, target_size *= 2);
 
             if (cmd->target == NULL)
             {
@@ -105,6 +113,8 @@ bool getTarget(Shell *shell, Command *cmd)
     }
 
     cmd->target[i] = '\0';
+    cmd->target_size = j;
+
     return false;
 }
 
@@ -118,66 +128,90 @@ bool getArgs(Shell *shell, Command *cmd)
         return false;
     }
 
-    int size_p1 = 1;
+    int args_size = 1;
+    int i = 0;
 
-    int i = strlen(cmd->target_size);
-    int j = 0;
-
-    while (true)
+    bool ongoing = true;
+    while (ongoing)
     {
-        cmd->args[j] = malloc(sizeof(char) * 2); // 2 for 1 char space and '\0'
+        // WHILE #1
+        if (i >= args_size)
+        {
+            cmd->args = realloc(cmd->args, sizeof(char *) * (++args_size));
 
-        if (cmd->args == NULL)
+            if (cmd->args == NULL)
+            {
+                perror("Failed to allocate cmd->args (input.c) ->");
+                return false;
+            }
+
+            continue;
+        }
+        // WHILE #1
+
+        // WHILE #2
+        int arg_nsize = 2; // 2 for 1 char space and '\0'
+        char *tmp = malloc(arg_nsize);
+
+        if (tmp == NULL)
         {
             perror("Failed to allocate cmd->args (input.c) ->");
+
+            for (int n = 0; n < args_size; n++)
+            {
+                free(cmd->args[n]);
+            }
+
+            free(cmd->args);
             return false;
         }
 
-        int k = 0;
-        int h = 0;
-        int size_p2 = 2;
+        int k = cmd->target_size;
+        int j = 0;
 
         while (true)
         {
-            char c = shell->commands[i++]; // Increment after assignation
+            char c = shell->commands[k++]; // Current char
 
-            if (c == '\0' || c == '\n' || !c || c == ' ')
+            printf("HERE -> %c", c);
+
+            if (c == ' ')
+                continue;
+
+            if (c == '\0' || c == '\n' || !c)
             {
-                if (c == ' ')
-                {
-                    i++;
-                    continue;
-                }
-
+                ongoing = false;
                 break;
             }
 
-            if (k >= size_p2 - 1)
+            if (j >= arg_nsize - 1)
             {
-                cmd->args[j] = realloc(cmd->args[j], sizeof(char) * (size_p2 *= 2));
+                tmp = realloc(tmp, arg_nsize *= 2);
 
-                if (cmd->args[j] == NULL)
+                if (tmp == NULL)
                 {
-                    perror("Failed to re-allocate cmd->args (input.c) -> ");
+                    perror("Failed to re-allocate cmd->args (input.c) ->");
+
+                    for (int n = 0; n < args_size; n++)
+                    {
+                        free(cmd->args[n]);
+                    }
+
                     free(cmd->args);
                     return false;
                 }
             }
 
-            cmd->args[j][k++] = c;
+            tmp[j] = c;
         }
 
-        cmd->args[j][k] = '\0';
-        cmd->args = realloc(cmd->args, (size_p1 *= 2) * sizeof(char *));
+        tmp[j] = '\0';
+        cmd->args[i] = malloc(arg_nsize);
+        strcpy(cmd->args[i], tmp);
+        // WHILE #2
 
-        if (cmd->args == NULL)
-        {
-            perror("Failed to re-allocate cmd->args (input.c) ->");
-            return false;
-        }
     }
-
-    cmd->args_size = j;
+    cmd->args_size = args_size;
     return true;
 }
 

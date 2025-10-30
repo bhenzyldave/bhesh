@@ -20,9 +20,7 @@ int Shell_init(Shell *self)
     return 1;
 #endif
 
-        chdir(&*self->home_dir);
-
-    self->commands = malloc(INITIAL_MAX_COMMANDS);
+    chdir(&*self->home_dir);
     self->prompt = displayShell(" >", self, ' ', ' ');
 
     return 0;
@@ -31,9 +29,17 @@ int Shell_init(Shell *self)
 int Shell_loop(Shell *self)
 {
     size_t curr_command_size = INITIAL_MAX_COMMANDS;
+    self->commands = malloc(curr_command_size);
+    
+    if (self->commands == NULL)
+    {
+        perror("Failed to allocate self->commands (bhesh.c) ->");
+        return 1;
+    }
+
     while (true)
     {
-        bool fetchResult = fetchInput(self->commands, &curr_command_size);
+        bool fetchResult = fetchInput(&self->commands, &curr_command_size);
 
         if (fetchResult)
             return 1;
@@ -45,6 +51,8 @@ int Shell_loop(Shell *self)
 
         displayShell(" >", self, ' ', ' ');
     }
+
+    return 0;
 }
 
 void Shell_cleanup(Shell *self)

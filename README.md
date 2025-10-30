@@ -19,16 +19,26 @@ Due to that __bhesh__ is not associated in any linux repository, so you may have
 ```
 git clone https://github.com/bhenzyldave/bhesh.git
 ```
-##### Make sure you have `Cmake` installed on your system.
+##### Make sure you have `Cmake` installed on your system. `cmake --version`
 Then, make sure you are in the __../bhesh__ folder as copied and run:
 ```
-cmake -S . -B build
-cmake --build build
+// Linux or MacOS (UNIX)
+chmod +x ./build.sh
+./build.sh
+
+// Windows
+./build.bat
 ```
 After this, the binary file should be stored on `./build` where `.` is the current directory where the cloned repository is located. Hence, you can now test it by:
 ```
+// Linux or MacOS (UNIX)
 build/bhesh
-# Or if it doesn't work
-./build/bhesh
+
+// Optional (Linux)
+chmod +x ./run.sh
+./run.sh
+
+// Windows
+./run.bat
 ```
 Then, you now have the compiled version of `bhesh` on your PC! You may configure it however you like on `src` & `headers` then just recompile it again using cmake.

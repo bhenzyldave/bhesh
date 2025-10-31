@@ -15,13 +15,16 @@ bool fetchInput(char **commands, size_t *cmd_size)
     {
         if (i >= (*cmd_size) - 1)
         {
-            *commands = realloc(*commands, ((*cmd_size) *= 2));
+            char * tmp_commands = realloc(*commands, ((*cmd_size) *= 2));
 
-            if (*commands == NULL)
+            if (tmp_commands == NULL)
             {
                 perror("Failed to allocate commands (input.c) ->");
                 return false;
             }
+
+            *commands = tmp_commands;
+            continue;
         }
 
         (*commands)[i++] = (char)c;
@@ -56,7 +59,7 @@ Command *getCommands(Shell *shell)
 
     if (!gT)
     {
-        perror("Failed to getCommandHead or getCommandBody (input.c) ->");
+        perror("Failed to getCommandHead (input.c) ->");
         free(cmds);
         return NULL;
     }
@@ -64,19 +67,18 @@ Command *getCommands(Shell *shell)
     printf("%s\n", (char *)cmds->target);
     printf("%d\n", cmds->target_size);
 
-    return cmds;
-
     bool gA = getCommandBody(shell, cmds);
 
     if (!gA)
     {
-        perror("Failed to getCommandHead or getCommandBody (input.c) ->");
+        perror("Failed to getCommandBody (input.c) ->");
         free(cmds);
         return NULL;
     }
 
+    if (cmds->args != NULL)
+        printf("%s\n", cmds->args[0]);
 
-    printf("%s\n", cmds->args[0]);
     printf("%d\n", cmds->args_size);
 
     return cmds;
@@ -115,15 +117,17 @@ bool getCommandHead(Shell *shell, Command *cmd)
 
         if (i >= target_size - 1)
         {
-            target_size *= 2;
-            cmd->target = realloc(cmd->target, sizeof(char) * target_size);
+            char * tmp_target = realloc(cmd->target, sizeof(char) * (target_size *= 2));
 
-            if (cmd->target == NULL)
+            if (tmp_target == NULL)
             {
                 perror("Failed to re-allocate cmd->target (input.c) ->");
                 free(cmd->target);
                 return false;
             }
+
+            cmd->target = tmp_target;
+            continue;
         }
 
         j++;
@@ -132,7 +136,7 @@ bool getCommandHead(Shell *shell, Command *cmd)
     }
 
     cmd->target[i] = '\0';
-    cmd->target_size = j;
+    cmd->target_size = ++j;
 
     return true;
 }
@@ -142,26 +146,16 @@ bool getCommandBody(Shell *shell, Command *cmd)
     int curr_c = cmd->target_size;
     char tmp_c = shell->commands[curr_c];
 
-    if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c) return false;
+    if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
+        return true;
 
     int argsSize = 1;
     cmd->args = malloc(sizeof(char *) * argsSize);
-
 
     int i = 0;
 
     while (true)
     {
-        if (i == argsSize)
-        {
-            cmd->args = realloc(cmd->args, (++argsSize) * sizeof(char *));
-
-            if (cmd->args == NULL)
-            {
-                perror("Failed to re-allocate cmd->args (input.c) ->");
-            }
-        }
-
         tmp_c = shell->commands[curr_c];
 
         if (tmp_c == ' ')
@@ -173,6 +167,18 @@ bool getCommandBody(Shell *shell, Command *cmd)
         if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
             break;
 
+        if (i == argsSize)
+        {
+            char ** tmp_args = realloc(cmd->args, (++argsSize) * sizeof(char *));
+
+            if (tmp_args == NULL)
+            {
+                perror("Failed to re-allocate cmd->args (input.c) ->");
+            }
+
+            cmd->args = tmp_args;
+        }
+
         int tmp_size = 32;
         char *tmp = malloc(sizeof(char) * tmp_size);
         int j = 0;
@@ -181,25 +187,27 @@ bool getCommandBody(Shell *shell, Command *cmd)
         {
             if (j >= tmp_size - 1)
             {
-                tmp = realloc(tmp, sizeof(char) * tmp_size);
+                char * tmp_tmp = realloc(tmp, sizeof(char) * (tmp_size *= 2));
 
-                if (tmp == NULL)
+                if (tmp_tmp == NULL)
                 {
                     perror("Failed to re-allocate tmp (input.c) ->");
                 }
+
+                tmp = tmp_tmp;
+                continue;
             }
 
             tmp_c = shell->commands[curr_c++];
 
-            if (tmp_c == '\n' || tmp_c == ' ' 
-                || tmp_c == '\0' || !tmp_c)
+            if (tmp_c == '\n' || tmp_c == ' ' || tmp_c == '\0' || !tmp_c)
                 break;
 
             tmp[j++] = tmp_c;
         }
 
-        strcpy(cmd->args[i++], tmp);
-        free(tmp);
+        tmp[j] = '\0';
+        cmd->args[i++] = tmp;
     }
 
     cmd->args_size = argsSize;

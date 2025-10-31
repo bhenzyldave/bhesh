@@ -60,7 +60,7 @@ Prompt *displayShell(char *promptCursor, Shell *shell, char c1, char c2)
 
     // Note: +1 for null terminator -> "\n" from sprintf()
     Prompt *prompt = malloc(sizeof(Prompt));
-    prompt->memPrompt = malloc(strlen(promptCurrent) + 1);
+    prompt->memPrompt = malloc((strlen(promptCurrent) + 1) * sizeof(char));
 
     if (prompt->memPrompt == NULL)
     {

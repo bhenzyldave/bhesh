@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
+#include <string.h>
 
 #include "bhesh.h"
 #include "prompt.h"
@@ -28,8 +29,8 @@ int Shell_init(Shell *self)
 
 int Shell_loop(Shell *self)
 {
-    size_t curr_command_size = INITIAL_MAX_COMMANDS;
-    self->commands = malloc(curr_command_size);
+    size_t curr_command_size = 64;
+    self->commands = malloc(curr_command_size * sizeof(char));
     
     if (self->commands == NULL)
     {
@@ -37,11 +38,13 @@ int Shell_loop(Shell *self)
         return 1;
     }
 
+    memset(self->commands, 0, curr_command_size);    
+
     while (true)
     {
         bool fetchResult = fetchInput(&self->commands, &curr_command_size);
 
-        if (fetchResult)
+        if (!fetchResult)
             return 1;
 
         Command *cmds = getCommands(self);

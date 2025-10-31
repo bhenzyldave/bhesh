@@ -8,7 +8,7 @@ bool fetchInput(char ** commands, size_t * cmd_size);
 Command * getCommands(Shell * shell);
 void handleCommands(Command cmd);
 bool isSystem(char * target);
-bool getTarget(Shell * shell, Command * cmd);
-bool getArgs(Shell * shell, Command * cmd);
+bool getCommandHead(Shell * shell, Command * cmd);
+bool getCommandBody(Shell * shell, Command * cmd);
 
 #endif

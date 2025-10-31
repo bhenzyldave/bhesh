@@ -1,73 +1,107 @@
+
+// C Libraries
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdbool.h>
 #include <unistd.h>
 #include <string.h>
 
+// Included Headers
 #include "bhesh.h"
 #include "prompt.h"
 #include "input.h"
+#include "constants.h"
 
-int Shell_init(Shell *self)
+// Function: Shell_init
+int Shell_init(Shell *self) // Arguments: struct Shell pointer
 {
-#if defined(_WIN32) || defined(_WIN64)
-    self->home_dir = getenv("HOMEDRIVER")
-#elif defined(__linux__)
-    self->home_dir = getenv("HOME");
-#elif defined(__APPLE__) && define(__MACH__)
-    self->home_dir = getenv("HOME");
+
+
+#if defined(_WIN32) || defined(_WIN64) // If defined as a Window Platform, use ENV: HOMEDRIVER
+
+    self->home_dir = getenv("HOMEDRIVER"); // Assigns the HOME path for Windows
+
+    // Note: We use same "HOME" for Mac and Linux, Reason: UNIX Systems
+
+#elif defined(__linux__) // if defined as Linux Platform, use ENV: HOME
+
+    self->home_dir = getenv("HOME"); // Assigns the HOME path for Linux
+
+#elif defined(__APPLE__) && define(__MACH__) // if defined as MAC OS Platform, use ENV: HOME
+
+    self->home_dir = getenv("HOME"); // Assigns the HOME path for MacOS
+
 #else
+
+    // if OS is unknown bhesh may not work properly unless modified
     perror("Unknown operating system!\n");
     return 1;
+
 #endif
 
-    chdir(&*self->home_dir);
-    self->prompt = displayShell(" >", self, ' ', ' ');
+    chdir(&*self->home_dir); // Sets the current directory as HOME path
+    printInterface(SHELL_INDICATOR, self, C_1, C_2); // Initially display shell
 
-    return 0;
+    return 0; // Ends the initialization on function: Shell_init()
 }
 
-int Shell_loop(Shell *self)
+// Function: Shell_loop
+int Shell_loop(Shell *self) // Argument: struct Shell pointer
 {
-    size_t curr_command_size = 64;
-    self->commands = malloc(curr_command_size * sizeof(char));
+    // Initially defines the current command size as 64 chars
+    size_t curr_command_size = 64 * sizeof(char); 
+
+    /* Allocates a space for command data and
+     stores it to the struct Shell -> string commands */
+    self->commands = malloc(curr_command_size);
     
+    // Checks if the allocation failed
     if (self->commands == NULL)
     {
+        // Prints the error and returns 1 for error
         perror("Failed to allocate self->commands (bhesh.c) ->");
         return 1;
     }
 
+    // Initialize the allocated space by 0 for char as '\0'
     memset(self->commands, 0, curr_command_size);    
 
+    // Starts the shell loop
     while (true)
     {
+        /* 
+            Fetch the shell user input and store it to self->commands,
+            returns false if an error went wrong, else true if successful
+        */
         bool fetchResult = fetchInput(&self->commands, &curr_command_size);
 
+        // Checks for error, Returns 1 if there are any
         if (!fetchResult)
             return 1;
 
+        /* 
+            Get shell user commands as: target (main command)
+            and args (command arguments)
+        */
         Command *cmds = getCommands(self);
 
+        /*
+            Checks if result is NULL (Generally, Allocation issues),
+            Returns 1 for error
+        */
         if (cmds == NULL)
             return 1;
 
-        displayShell(" >", self, ' ', ' ');
+        // Updates shell interface aftter command execution
+        printInterface(SHELL_INDICATOR, self, C_1, C_2);
     }
 
-    return 0;
+    return 0; // Ends Shell_loop function
 }
 
-void Shell_cleanup(Shell *self)
+// Function: Shell_cleanup
+void Shell_cleanup(Shell *self) // Arguments: struct Shell pointer
 {
-    if (self->commands != NULL)
-        free(self->commands);
-
-    if (self->prompt != NULL)
-    {
-        if (self->prompt->memPrompt != NULL)
-            free(self->prompt->memPrompt);
-
-        free(self->prompt);
-    }
+    // Free the memory allocated data
+    free(self->commands);
 }

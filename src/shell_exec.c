@@ -67,7 +67,7 @@ void exec_external_commands(Command *cmd, bool * errno)
         // Execute the external command and check for errors
         if (execvp(args[0], args) == -1)
         {
-            fprintf(stderr, "'%s |-> No such command exists! :(\n", args[0]);
+            fprintf(stderr, "'%s' -> No such command exists! :(\n", args[0]);
             *errno = false;
 
             for (int r = 0; args[r] != NULL; r++)

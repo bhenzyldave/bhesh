@@ -24,7 +24,7 @@ bool fetchInput(char **commands, size_t *cmd_size)
 
             if (tmp_commands == NULL)
             {
-                perror("Failed to allocate commands (input.c) ->");
+                perror("\nFailed to allocate commands (input.c) ->");
                 return false;
             }
 
@@ -35,8 +35,7 @@ bool fetchInput(char **commands, size_t *cmd_size)
     }
 
     // Adds null terminator at last block
-    if (c != 0)
-        (*commands)[i] = '\0';
+    (*commands)[i] = '\0';
 
     return true;
 }
@@ -47,7 +46,7 @@ bool getCommands(Shell *shell, Command *cmds)
     // Get the command head (head)
     if (!getCommandHead(shell, cmds))
     {
-        perror("Failed to getCommandHead (input.c) ->");
+        perror("\nFailed to getCommandHead (input.c) ->");
         free(cmds);
         return false;
     }
@@ -55,19 +54,10 @@ bool getCommands(Shell *shell, Command *cmds)
     // Get the command body (body)
     if (!getCommandBody(shell, cmds))
     {
-        perror("Failed to getCommandBody (input.c) ->");
+        perror("\nFailed to getCommandBody (input.c) ->");
         free(cmds);
         return false;
     }
-
-    // DEBUG
-    // printf("%s\n", (char *)cmds->head);
-    // printf("%d\n", cmds->head_length);
-
-    // DEBUG
-    // if (cmds->body != NULL)
-    //    printf("%s\n", cmds->body[0]);
-    // printf("%d\n", cmds->body_size);
 
     return true;
 }
@@ -80,7 +70,7 @@ bool getCommandHead(Shell *shell, Command *cmd)
 
     if (cmd->head == NULL)
     {
-        perror("Failed to allocate cmd->head (input.c) ->");
+        perror("\nFailed to allocate cmd->head (input.c) ->");
         return false;
     }
 
@@ -123,7 +113,7 @@ bool getCommandHead(Shell *shell, Command *cmd)
 
             if (tmp_target == NULL)
             {
-                perror("Failed to re-allocate cmd->head (input.c) ->");
+                perror("\nFailed to re-allocate cmd->head (input.c) ->");
                 free(cmd->head);
                 return false;
             }
@@ -137,10 +127,19 @@ bool getCommandHead(Shell *shell, Command *cmd)
         j++;                // Increments for next character
     }
 
+    if (!letterFound)
+    {
+        free(cmd->head);
+        cmd->head = malloc(sizeof(char));
+        cmd->head[0] = '\0';
+        cmd->head_length = 0;
+        return true;
+    }
+
     // Assign last reserved space for null terminal
     cmd->head[i] = '\0';
 
-    // Assign j as head size with additional pre-increment as j starts from 0
+    // Assign j as head size
     cmd->head_length = ++j;
 
     return true;
@@ -150,14 +149,15 @@ bool getCommandHead(Shell *shell, Command *cmd)
 bool getCommandBody(Shell *shell, Command *cmd)
 {
     int curr_c = cmd->head_length;
-    char tmp_c = shell->commands[curr_c - 1];
+    char tmp_c = shell->commands[(curr_c > 0) ? curr_c - 1 : 0];
 
     // Checks for no body
-    if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
+    if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c || cmd->head_length == 0)
         return true;
 
     int bodySize = 1;
     cmd->body = malloc(sizeof(char *) * bodySize);
+    cmd->body[0] = (char)0;
 
     // Assigns number of loops
     int i = 0;
@@ -179,14 +179,14 @@ bool getCommandBody(Shell *shell, Command *cmd)
         if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
             break;
 
-        if (i == bodySize)
+        if (i >= bodySize)
         {
             // Safely resizes allocated arg by +1 (Add new arg to the array)
             char **tmp_body = realloc(cmd->body, (++bodySize) * sizeof(char *));
 
             if (tmp_body == NULL)
             {
-                perror("Failed to re-allocate cmd->body (input.c) ->");
+                perror("\nFailed to re-allocate cmd->body (input.c) ->");
 
                 for (int n = 0; n < (i + 1); n++)
                 {
@@ -206,7 +206,7 @@ bool getCommandBody(Shell *shell, Command *cmd)
 
         if (tmp == NULL)
         {
-            perror("Failed to allocate tmp (input.c) ->");
+            perror("\nFailed to allocate tmp (input.c) ->");
 
             for (int n = 0; n < (i + 1); n++)
             {
@@ -232,7 +232,7 @@ bool getCommandBody(Shell *shell, Command *cmd)
 
                 if (tmp_tmp == NULL)
                 {
-                    perror("Failed to re-allocate tmp (input.c) ->");
+                    perror("\nFailed to re-allocate tmp (input.c) ->");
 
                     for (int n = 0; n < (i + 1); n++)
                     {
@@ -252,7 +252,11 @@ bool getCommandBody(Shell *shell, Command *cmd)
 
             // If char is end break loop for new arg
             if (tmp_c == '\n' || tmp_c == ' ' || tmp_c == '\0' || !tmp_c)
+            {
+                // Decrement to avoid missing out the null terminator
+                curr_c--;
                 break;
+            }
 
             // Else, assign current char to current arg block
             tmp[j++] = tmp_c;
@@ -267,5 +271,6 @@ bool getCommandBody(Shell *shell, Command *cmd)
 
     // Assign body_size
     cmd->body_size = bodySize;
+    printf("'%d'\n", cmd->body_size);
     return true;
 }

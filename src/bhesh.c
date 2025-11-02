@@ -24,13 +24,13 @@ int Shell_init(Shell *self)
     self->home_dir = getenv("HOME");
 #else
     // if OS is unknown bhesh may not work properly unless modified
-    perror("Unknown operating system!\n");
+    perror("\nUnknown operating system! -> ");
     return 1;
 
 #endif
 
     // Set the directory and print interface initially
-    return (!chdir(&*self->home_dir)) && printInterface(SHELL_INDICATOR, self, C_1, C_2);
+    return (!chdir(self->home_dir)) && printInterface(SHELL_INDICATOR, self, C_1, C_2) && setenv("PWD", self->home_dir, 1) == 0;
 }
 
 // Function: Shell_run
@@ -44,24 +44,26 @@ int Shell_run(Shell *self)
 
     if (self->commands == NULL)
     {
-        perror("Failed to allocate self->commands (bhesh.c) ->");
+        perror("\nFailed to allocate self->commands (bhesh.c) ->");
         return 1;
     }
 
     // Initialize the allocated space by 0 for char as '\0'
     memset(self->commands, 0, curr_command_size);
 
-    bool errno = false;
+    bool err_status = false;
+
+    Command *cmds = NULL;
 
     // Starts the shell loop
-    while (!errno)
+    while (!err_status)
     {
 
-        Command *cmds = malloc(sizeof(Command));
+        cmds = malloc(sizeof(Command));
 
         if (cmds == NULL)
         {
-            perror("Failed to getCommandHead or getCommandBody (input.c) ->");
+            perror("\nFailed to allocate cmds (input.c) ->");
             return 1;
         }
 
@@ -76,7 +78,7 @@ int Shell_run(Shell *self)
         */
         if (!fetchInput(&self->commands, &curr_command_size))
         {
-            errno = true;
+            err_status = true;
             break;
         }
 
@@ -86,12 +88,27 @@ int Shell_run(Shell *self)
         */
 
         // Execute processed chronologically and check once
-        if (!getCommands(self, cmds) || !manageCommands(cmds)    // Execute the commands
-            || !printInterface(SHELL_INDICATOR, self, C_1, C_2)) // Updates the shell interface
+        if (!getCommands(self, cmds) || !manageCommands(cmds, self->home_dir) // Execute the commands
+            || !printInterface(SHELL_INDICATOR, self, C_1, C_2))              // Updates the shell interface
         {
-            errno = true;
+            err_status = true;
         }
 
+        // Clean up allocated commands
+        for (int n = 0; n < cmds->body_size; n++)
+        {
+            free(cmds->body[n]);
+        }
+        
+        free(cmds->head);
+        free(cmds->body);
+        free(cmds);
+
+        cmds = NULL;
+    }
+
+    if (cmds != NULL)
+    {
         // Clean up allocated commands
         for (int n = 0; n < cmds->body_size; n++)
         {
@@ -104,5 +121,5 @@ int Shell_run(Shell *self)
 
     // Clean and exit
     free(self->commands);
-    return errno;
+    return err_status;
 }

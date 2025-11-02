@@ -10,6 +10,7 @@ set(SOURCES
    src/input.c
    src/prompt.c
    src/parser.c
+   src/utilities.c
 )
 
 add_custom_target(clean-all

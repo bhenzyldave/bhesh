@@ -53,4 +53,5 @@ chsh "$(which bhesh)"
 // Or (If you haven't added it on PATH)
 chsh "$(your/build/bhesh/path)"
 ```
-[!NOTE] Windows is not yet compatible with this shell, but it will be in the near future.
+> [!NOTE] 
+> Windows is not yet compatible with this shell, but it will be in the near future.

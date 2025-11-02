@@ -20,7 +20,7 @@ bool fetchInput(char **commands, size_t *cmd_size)
         // Checks for buffer overflow and safely resizes it to match buffer size
         if (i >= (*cmd_size) - 1)
         {
-            char * tmp_commands = realloc(*commands, ((*cmd_size) *= 2));
+            char *tmp_commands = realloc(*commands, ((*cmd_size) *= 2));
 
             if (tmp_commands == NULL)
             {
@@ -102,8 +102,8 @@ bool getCommandHead(Shell *shell, Command *cmd)
         perror("Failed to allocate cmd->head (input.c) ->");
         return false;
     }
-    
-    // Placeholder if a letter is found 
+
+    // Placeholder if a letter is found
     // to deal with >___command where _ are whitespaces
     bool letterFound = false;
 
@@ -138,7 +138,7 @@ bool getCommandHead(Shell *shell, Command *cmd)
         if (i >= target_size - 1)
         {
             // Safely reallocates new size by doubling space for new chars
-            char * tmp_target = realloc(cmd->head, sizeof(char) * (target_size *= 2));
+            char *tmp_target = realloc(cmd->head, sizeof(char) * (target_size *= 2));
 
             if (tmp_target == NULL)
             {
@@ -153,7 +153,7 @@ bool getCommandHead(Shell *shell, Command *cmd)
 
         cmd->head[i++] = c;
         letterFound = true; // Assigns true for letter is found, proof after endline checks
-        j++; // Increments for next character
+        j++;                // Increments for next character
     }
 
     // Assign last reserved space for null terminal
@@ -201,13 +201,18 @@ bool getCommandBody(Shell *shell, Command *cmd)
         if (i == argsSize)
         {
             // Safely resizes allocated arg by +1 (Add new arg to the array)
-            char ** tmp_args = realloc(cmd->args, (++argsSize) * sizeof(char *));
+            char **tmp_args = realloc(cmd->args, (++argsSize) * sizeof(char *));
 
             if (tmp_args == NULL)
             {
                 perror("Failed to re-allocate cmd->args (input.c) ->");
 
-                // Cleans
+                for (int n = 0; n < i; i++)
+                {
+                    free(cmd->args[i]);
+                }
+
+                free(cmd->args);
 
                 return false;
             }
@@ -222,7 +227,12 @@ bool getCommandBody(Shell *shell, Command *cmd)
         {
             perror("Failed to allocate tmp (input.c) ->");
 
-            // Clean
+            for (int n = 0; n < i; i++)
+            {
+                free(cmd->args[i]);
+            }
+
+            free(cmd->args);
 
             return false;
         }
@@ -237,13 +247,18 @@ bool getCommandBody(Shell *shell, Command *cmd)
             if (j >= tmp_size - 1)
             {
                 // Doubles allocation size and store safely
-                char * tmp_tmp = realloc(tmp, sizeof(char) * (tmp_size *= 2));
+                char *tmp_tmp = realloc(tmp, sizeof(char) * (tmp_size *= 2));
 
                 if (tmp_tmp == NULL)
                 {
                     perror("Failed to re-allocate tmp (input.c) ->");
 
-                    // Clean
+                    for (int n = 0; n < i; i++)
+                    {
+                        free(cmd->args[i]);
+                    }
+
+                    free(cmd->args);
 
                     return false;
                 }

@@ -1,4 +1,1 @@
 [TASKS]
-
-input.c -> 210, 225, 246
-prompt.c -> 67, 54

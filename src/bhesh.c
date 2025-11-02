@@ -29,7 +29,10 @@ int Shell_init(Shell *self)
 #endif
 
     chdir(&*self->home_dir);
-    printInterface(SHELL_INDICATOR, self, C_1, C_2);
+
+    // Print interface initially
+    if (!printInterface(SHELL_INDICATOR, self, C_1, C_2))
+            return 1;
 
     return 0;
 }
@@ -59,9 +62,7 @@ int Shell_loop(Shell *self)
             Fetch the shell user input and store it to self->commands,
             returns false if an error went wrong, else true if successful
         */
-        bool fetchResult = fetchInput(&self->commands, &curr_command_size);
-
-        if (!fetchResult)
+        if (!fetchInput(&self->commands, &curr_command_size))
             return 1;
 
         /* 
@@ -74,7 +75,8 @@ int Shell_loop(Shell *self)
             return 1;
 
         // Updates shell interface aftter command execution
-        printInterface(SHELL_INDICATOR, self, C_1, C_2);
+        if (!printInterface(SHELL_INDICATOR, self, C_1, C_2))
+            return 1;
     }
 
     return 0;

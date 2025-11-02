@@ -14,13 +14,13 @@ int main()
     Shell shell;
 
     // Initialize shell
-    int r1 = Shell_init(&shell);
-
-    if (r1) return 1;
+    if (Shell_init(&shell))
+        return 1;
     
     // Starts shell loop
-    Shell_loop(&shell);
-
+    if (Shell_loop(&shell))
+        return 1;
+        
     // Cleans up shell
     Shell_cleanup(&shell);
 

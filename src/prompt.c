@@ -42,7 +42,7 @@ char *get_curr_dir()
 
 // Function: printInterface
 // (More information about shell_indicator, c1, and c2 on prompt.h)
-void printInterface(char *shell_indicator, Shell *shell, char c1, char c2)
+bool printInterface(char *shell_indicator, Shell *shell, char c1, char c2)
 {
     // Get the current directory
     char *cwd = get_curr_dir();
@@ -50,8 +50,8 @@ void printInterface(char *shell_indicator, Shell *shell, char c1, char c2)
     if (cwd == NULL)
     {
         perror("Failed to fetch current directory (prompt.c: get_curr_dir()) ->");
-        
-        // Clean and exit
+        free(cwd);
+        return false;
     }
 
     // If cwd is equal to HOME path
@@ -63,8 +63,8 @@ void printInterface(char *shell_indicator, Shell *shell, char c1, char c2)
         if (tmp_cwd == NULL)
         {
             perror("Failed to re-allocate cwd (prompt.c) ->");
-
-            // Clean and exit
+            free(cwd);
+            return false;
         }
 
         // Changes main variable with new memory address
@@ -78,4 +78,5 @@ void printInterface(char *shell_indicator, Shell *shell, char c1, char c2)
     // Prints shell interface as default: " ~ >"
     printf("%c%s%c%s", c1, cwd, c2, shell_indicator);
     free(cwd); // Frees cwd (clean up)
+    return true;
 }

@@ -24,7 +24,7 @@
 
     Usage: Updates the shell interface
 */
-void printInterface(char * shell_indicator, Shell * shell, char c1, char c2);
+bool printInterface(char * shell_indicator, Shell * shell, char c1, char c2);
 
 /*
     Declares function: get_curr_dir with no arguments.

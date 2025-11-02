@@ -9,6 +9,7 @@ set(SOURCES
    src/bhesh.c
    src/input.c
    src/prompt.c
+   src/parser.c
 )
 
 add_custom_target(clean-all

@@ -5,6 +5,7 @@ include_directories(include src)
 
 set(SOURCES
    src/shell.c
+   src/shell_exec.c
    src/bhesh.c
    src/input.c
    src/prompt.c

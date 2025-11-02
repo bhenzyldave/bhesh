@@ -1,56 +1,45 @@
 #ifndef DATASTRUCTS_H
 #define DATASTRUCTS_H
-/*
-    Defines a struct named Command 
-    with the following data:
 
-        - head -> This data represents the pointer
-        of the memory allocated string of the head
-        main command. Such as for instance:
-
-            ~ >command arg1 arg2
-
-            head = command which represents the main call.
-            Where: head is a string
-
-        - target_size -> Due to logical reasons,
-        this variable acts as a pointer to the previous
-        last char or the length of head (strlen(head))
-        to be used on excluding the main command as argument.
-
-        - args -> This represents as an array of strings where
-        all arguments are stored. This points out to the memory
-        allocated data. (More explanation on input.c -> getCommandBody())
-
-        - args_size -> This represents as the size of the arguments
-        stored. Such as the number of arguments.
-*/
+/**
+ * @struct Command
+ * @brief Represents a parsed shell command with its arguments.
+ * 
+ * This structure holds the main command (head) and its arguments.
+ * 
+ * Members:
+ * - `head`: Pointer to the memory-allocated string representing the main command.
+ *   Example: For the input `command arg1 arg2`, `head` would be "command".
+ * - `head_length`: Represents the length of the `head` string (strlen(head)).
+ *   Used to exclude the main command when processing arguments.
+ * - `body`: Array of strings where all arguments are stored.
+ *   Points to memory-allocated data.
+ * - `body_size`: Number of arguments stored in `body`.
+ */
 typedef struct
 {
-    char * head;
-    int target_size;
+    char *head;       /**< Pointer to the main command string. (Allocated) */
+    int head_length;  /**< Length of the `head` string. */
 
-    char ** args;
-    int args_size;
+    char **body;      /**< Array of strings representing arguments. (Allocated) */
+    int body_size;    /**< Number of arguments in `body`. */
 } Command;
 
-/*
-    Defines a struct named Shell
-    with the following data:
-
-        - home_dir -> This holds the value of the current
-        directory of the shell.
-
-        - commands -> This points to the array of chars of
-        the overall command input given by the shell user.
-
-        -> prompt -> This represents the Prompt struct.
-        (More information about it above)
-*/
+/**
+ * @struct Shell
+ * @brief Represents the shell's state and data.
+ * 
+ * This structure holds information about the shell's current state,
+ * including the home directory and the user's input commands.
+ * 
+ * Members:
+ * - `home_dir`: Pointer to the string representing the current directory of the shell.
+ * - `commands`: Pointer to the memory-allocated string of the user's input commands.
+ */
 typedef struct
 {
-    char *home_dir;
-    char *commands;
+    char *home_dir;   /**< Pointer to the current directory string. (Not allocated) */
+    char *commands;   /**< Pointer to the user's input commands. (Allocated) */
 } Shell;
 
 #endif

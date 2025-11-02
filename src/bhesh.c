@@ -11,6 +11,7 @@
 #include "prompt.h"
 #include "input.h"
 #include "constants.h"
+#include "shell_exec.h"
 
 // Function: Shell_init
 int Shell_init(Shell *self)
@@ -28,24 +29,19 @@ int Shell_init(Shell *self)
 
 #endif
 
-    chdir(&*self->home_dir);
-
-    // Print interface initially
-    if (!printInterface(SHELL_INDICATOR, self, C_1, C_2))
-            return 1;
-
-    return 0;
+    // Set the directory and print interface initially
+    return (!chdir(&*self->home_dir)) && printInterface(SHELL_INDICATOR, self, C_1, C_2);
 }
 
-// Function: Shell_loop
-int Shell_loop(Shell *self) 
+// Function: Shell_run
+int Shell_run(Shell *self)
 {
-    size_t curr_command_size = 64 * sizeof(char); 
+    size_t curr_command_size = 64 * sizeof(char);
 
     /* Allocates a space for command data and
      stores it to the struct Shell -> string commands */
     self->commands = malloc(curr_command_size);
-    
+
     if (self->commands == NULL)
     {
         perror("Failed to allocate self->commands (bhesh.c) ->");
@@ -53,38 +49,58 @@ int Shell_loop(Shell *self)
     }
 
     // Initialize the allocated space by 0 for char as '\0'
-    memset(self->commands, 0, curr_command_size);    
+    memset(self->commands, 0, curr_command_size);
+
+    bool errno = false;
 
     // Starts the shell loop
-    while (true)
+    while (!errno)
     {
-        /* 
+
+        Command *cmds = malloc(sizeof(Command));
+
+        if (cmds == NULL)
+        {
+            perror("Failed to getCommandHead or getCommandBody (input.c) ->");
+            return 1;
+        }
+
+        cmds->body = NULL;
+        cmds->body_size = 0;
+        cmds->head = NULL;
+        cmds->head_length = 0;
+
+        /*
             Fetch the shell user input and store it to self->commands,
             returns false if an error went wrong, else true if successful
         */
         if (!fetchInput(&self->commands, &curr_command_size))
-            return 1;
+        {
+            errno = true;
+            break;
+        }
 
-        /* 
-            Get shell user commands as: head (main command)
-            and args (command arguments)
+        /*
+            getCommands(): Get shell user commands as: head (main command)
+            and body (command arguments)
         */
-        Command *cmds = getCommands(self);
 
-        if (cmds == NULL)
-            return 1;
+        // Execute processed chronologically and check once
+        if (!getCommands(self, cmds) || !manageCommands(cmds)    // Execute the commands
+            || !printInterface(SHELL_INDICATOR, self, C_1, C_2)) // Updates the shell interface
+        {
+            errno = true;
+        }
 
-        // Updates shell interface aftter command execution
-        if (!printInterface(SHELL_INDICATOR, self, C_1, C_2))
-            return 1;
+        for (int n = 0; n < cmds->body_size; n++)
+        {
+            free(cmds->body[n]);
+        }
+        free(cmds->head);
+        free(cmds->body);
+        free(cmds);
     }
 
-    return 0;
-}
-
-// Function: Shell_cleanup
-void Shell_cleanup(Shell *self)
-{
-    // Free the memory allocated data
     free(self->commands);
+    return errno;
 }

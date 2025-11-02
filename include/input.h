@@ -5,62 +5,52 @@
 #include <stdbool.h>
 #include "datastructs.h"
 
-/*
-    Declares function: fetchInput with double pointer
-    char commands and a pointer size_t cmdsize as
-    arguments.
+/**
+ * @brief Fetches the shell user input.
+ * 
+ * This function reads the user's input from the shell and stores it in the 
+ * provided `commands` buffer. The size of the buffer is updated in `cmd_size`.
+ * 
+ * @param commands Double pointer to the buffer where the input will be stored.
+ * @param cmd_size Pointer to the size of the buffer.
+ * @return bool Returns true on success, or false on failure.
+ */
+bool fetchInput(char **commands, size_t *cmd_size);
 
-    Usage: To fetch the shell user input. (More information
-    about it on input.c -> fetchInput())
-*/
-bool fetchInput(char ** commands, size_t * cmd_size);
+/**
+ * @brief Parses the shell user input into a Command structure.
+ * 
+ * This function processes the user's input stored in the Shell structure 
+ * and extracts the main command (head) and its arguments (body).
+ * 
+ * @param shell Pointer to the Shell structure containing the user's input.
+ * @param cmds Pointer to the Command structure where the head will be stored.
+ * @return bool Returns true on success, or false on failure.
+ */
+bool getCommands(Shell *shell, Command * cmds);
 
-/*
-    Declares function: getCOmmands with struct Shell
-    as main argument from datastructs.h -> Shell.
+/**
+ * @brief Extracts the main command (head) from the user's input.
+ * 
+ * This function retrieves the main command (head) from the user's input 
+ * stored in the Shell structure and stores it in the Command structure.
+ * 
+ * @param shell Pointer to the Shell structure containing the user's input.
+ * @param cmd Pointer to the Command structure where the head will be stored.
+ * @return bool Returns true on success, or false on failure.
+ */
+bool getCommandHead(Shell *shell, Command *cmd);
 
-    Usage: To get the commands from the shell user input
-    such as: head as main command and args as the arguments
-    of the commands (More information about it on input.c -> getCommands())
-*/
-Command * getCommands(Shell * shell);
-
-/*
-    Declares function: handleCommands with struct Command 
-    as the main argument from datastructs.h -> Command.
-
-    Usage: -
-*/
-void handleCommands(Command cmd);
-
-/*
-    Declares function: isShellCommand with a pointer of 
-    head as main argument.
-
-    Usage: Returns a value true if the main command
-    is a shell built-in command, else false. This
-    function is used to differentiate built-in shell
-    commands and external commands.
-*/
-bool isShellCommand(char * head);
-
-/*
-    Declares function: getCommandHead with struct Shell
-    and struct Command as aguments.
-
-    Usage: To get the main command (head).
-    (More information about it on input.c -> getCommandHead())
-*/
-bool getCommandHead(Shell * shell, Command * cmd);
-
-/*
-    Declares function: getCommandBody with struct Shell
-    and struct Command as arguments.
-
-    Usage: To get the arguments of the shell user
-    input command (args). (More information about it
-    on input.c -> getCommandBody())
-*/
-bool getCommandBody(Shell * shell, Command * cmd);
+/**
+ * @brief Extracts the arguments (body) from the user's input.
+ * 
+ * This function retrieves the arguments (body) from the user's input stored 
+ * in the Shell structure and stores them in the Command structure.
+ * 
+ * @param shell Pointer to the Shell structure containing the user's input.
+ * @param cmd Pointer to the Command structure where the arguments will be stored.
+ * @return bool Returns true on success, or false on failure.
+ */
+bool getCommandBody(Shell *shell, Command *cmd);
 
 #endif

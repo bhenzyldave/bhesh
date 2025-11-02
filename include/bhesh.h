@@ -4,28 +4,27 @@
 // Includes "datastructs.h" from bhesh/include
 #include "datastructs.h"
 
-/*
-    Declares function: Shell_init with struct Shell 
-    as arguments from datastructs.h -> Shell
-
-    Usage: For initializing Shell data
-*/
+/**
+ * @brief Initializes the Shell data structure.
+ * 
+ * @param self Pointer to the Shell structure (defined in datastructs.h).
+ * @return int Returns 0 on success, or 1 on failure.
+ */
 int Shell_init(Shell *self);
 
-/*
-    Declares function: Shell_cleanup with struct Shell 
-    as arguments from datastructs.h -> Shell
-
-    Usage: For cleaning up memory allocated data 
-*/
+/**
+ * @brief Cleans up memory allocated for the Shell structure.
+ * 
+ * @param self Pointer to the Shell structure (defined in datastructs.h).
+ */
 void Shell_cleanup(Shell *self);
 
-/*
-    Declares function: Shell_loop with struct Shell 
-    as arguments from datastructs.h -> Shell
-
-    Usage: For keeping the program running
-*/
-int Shell_loop(Shell * self);
+/**
+ * @brief Starts the main shell loop, keeping the program running.
+ * 
+ * @param self Pointer to the Shell structure (defined in datastructs.h).
+ * @return int Returns 0 on success, or 1 on failure.
+ */
+int Shell_run(Shell *self);
 
 #endif

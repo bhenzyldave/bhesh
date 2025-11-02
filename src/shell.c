@@ -13,16 +13,9 @@ int main()
 {
     Shell shell;
 
-    // Initialize shell
-    if (Shell_init(&shell))
+    // Initialize shell and run
+    if (!Shell_init(&shell) || !Shell_run(&shell))
         return 1;
-    
-    // Starts shell loop
-    if (Shell_loop(&shell))
-        return 1;
-        
-    // Cleans up shell
-    Shell_cleanup(&shell);
 
-    return 0; // End shell program
+    return 0;
 }

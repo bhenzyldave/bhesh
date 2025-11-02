@@ -41,61 +41,42 @@ bool fetchInput(char **commands, size_t *cmd_size)
     return true;
 }
 
-// -
-void handleCommands(Command cmd)
-{
-}
-
 // Function: getCommands
-Command *getCommands(Shell *shell)
+bool getCommands(Shell *shell, Command *cmds)
 {
-    Command *cmds = malloc(sizeof(Command));
-
-    if (cmds == NULL)
-    {
-        perror("Failed to getCommandHead or getCommandBody (input.c) ->");
-        return NULL;
-    }
-
-    // Initializes the new struct correspondingly
-    cmds->args = NULL;
-    cmds->args_size = 0;
-    cmds->head = NULL;
-    cmds->target_size = 0;
-
     // Get the command head (head)
     if (!getCommandHead(shell, cmds))
     {
         perror("Failed to getCommandHead (input.c) ->");
         free(cmds);
-        return NULL;
+        return false;
     }
 
-    // DEBUG
-    printf("%s\n", (char *)cmds->head);
-    printf("%d\n", cmds->target_size);
-
-    // Get the command body (args)
+    // Get the command body (body)
     if (!getCommandBody(shell, cmds))
     {
         perror("Failed to getCommandBody (input.c) ->");
         free(cmds);
-        return NULL;
+        return false;
     }
 
     // DEBUG
-    if (cmds->args != NULL)
-        printf("%s\n", cmds->args[0]);
-    printf("%d\n", cmds->args_size);
+    printf("%s\n", (char *)cmds->head);
+    printf("%d\n", cmds->head_length);
 
-    return cmds;
+    // DEBUG
+    if (cmds->body != NULL)
+        printf("%s\n", cmds->body[0]);
+    printf("%d\n", cmds->body_size);
+
+    return true;
 }
 
 // Function: getCommandHead
 bool getCommandHead(Shell *shell, Command *cmd)
 {
-    int target_size = 64 * sizeof(char);
-    cmd->head = malloc(target_size);
+    int head_length = 64 * sizeof(char);
+    cmd->head = malloc(head_length);
 
     if (cmd->head == NULL)
     {
@@ -135,10 +116,10 @@ bool getCommandHead(Shell *shell, Command *cmd)
         }
 
         // If number of loops exceeds allocated size
-        if (i >= target_size - 1)
+        if (i >= head_length - 1)
         {
             // Safely reallocates new size by doubling space for new chars
-            char *tmp_target = realloc(cmd->head, sizeof(char) * (target_size *= 2));
+            char *tmp_target = realloc(cmd->head, sizeof(char) * (head_length *= 2));
 
             if (tmp_target == NULL)
             {
@@ -160,7 +141,7 @@ bool getCommandHead(Shell *shell, Command *cmd)
     cmd->head[i] = '\0';
 
     // Assign j as head size with additional pre-increment as j starts from 0
-    cmd->target_size = ++j;
+    cmd->head_length = ++j;
 
     return true;
 }
@@ -168,15 +149,15 @@ bool getCommandHead(Shell *shell, Command *cmd)
 // Function: getCommandBody
 bool getCommandBody(Shell *shell, Command *cmd)
 {
-    int curr_c = cmd->target_size;
-    char tmp_c = shell->commands[curr_c];
+    int curr_c = cmd->head_length;
+    char tmp_c = shell->commands[curr_c - 1];
 
     // Checks for no body
     if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
         return true;
 
-    int argsSize = 1;
-    cmd->args = malloc(sizeof(char *) * argsSize);
+    int bodySize = 1;
+    cmd->body = malloc(sizeof(char *) * bodySize);
 
     // Assigns number of loops
     int i = 0;
@@ -194,30 +175,30 @@ bool getCommandBody(Shell *shell, Command *cmd)
             continue;
         }
 
-        // If end of command, break (no args left)
+        // If end of command, break (no body left)
         if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
             break;
 
-        if (i == argsSize)
+        if (i == bodySize)
         {
             // Safely resizes allocated arg by +1 (Add new arg to the array)
-            char **tmp_args = realloc(cmd->args, (++argsSize) * sizeof(char *));
+            char **tmp_body = realloc(cmd->body, (++bodySize) * sizeof(char *));
 
-            if (tmp_args == NULL)
+            if (tmp_body == NULL)
             {
-                perror("Failed to re-allocate cmd->args (input.c) ->");
+                perror("Failed to re-allocate cmd->body (input.c) ->");
 
-                for (int n = 0; n < i; i++)
+                for (int n = 0; n < (i + 1); n++)
                 {
-                    free(cmd->args[i]);
+                    free(cmd->body[n]);
                 }
 
-                free(cmd->args);
+                free(cmd->body);
 
                 return false;
             }
 
-            cmd->args = tmp_args;
+            cmd->body = tmp_body;
         }
 
         int tmp_size = 32 * sizeof(char);
@@ -227,12 +208,12 @@ bool getCommandBody(Shell *shell, Command *cmd)
         {
             perror("Failed to allocate tmp (input.c) ->");
 
-            for (int n = 0; n < i; i++)
+            for (int n = 0; n < (i + 1); n++)
             {
-                free(cmd->args[i]);
+                free(cmd->body[n]);
             }
 
-            free(cmd->args);
+            free(cmd->body);
 
             return false;
         }
@@ -240,7 +221,7 @@ bool getCommandBody(Shell *shell, Command *cmd)
         // Assigns number of loops for strings
         int j = 0;
 
-        // Starts loop for args list string chars
+        // Starts loop for body list string chars
         while (true)
         {
             // If number of loops exceeds allocated size
@@ -253,12 +234,12 @@ bool getCommandBody(Shell *shell, Command *cmd)
                 {
                     perror("Failed to re-allocate tmp (input.c) ->");
 
-                    for (int n = 0; n < i; i++)
+                    for (int n = 0; n < (i + 1); n++)
                     {
-                        free(cmd->args[i]);
+                        free(cmd->body[n]);
                     }
 
-                    free(cmd->args);
+                    free(cmd->body);
 
                     return false;
                 }
@@ -281,32 +262,10 @@ bool getCommandBody(Shell *shell, Command *cmd)
         tmp[j] = '\0';
 
         // Assign string to arg number i
-        cmd->args[i++] = tmp;
+        cmd->body[i++] = tmp;
     }
 
-    // Assign args_size
-    cmd->args_size = argsSize;
+    // Assign body_size
+    cmd->body_size = bodySize;
     return true;
-}
-
-// Function: isShellCommand
-bool isShellCommand(char *head)
-{
-    // Maintainer Note: Add more commands later
-
-    // Initializes built-in shell commands
-    char *shellCmdTargets[] = {
-        "cd", "pwd", "export", "exit"};
-
-    // Explicitly state the number of shell commands for performance reasons
-    // Where number of strings on shellCmdTargets - 1 is on i < n
-    for (int i = 0; i < 3; i++)
-    {
-        // If it matches command, return true
-        if (strcmp(shellCmdTargets[i], head) == 0)
-            return true;
-    }
-
-    // Return false for no match on commands
-    return false;
 }

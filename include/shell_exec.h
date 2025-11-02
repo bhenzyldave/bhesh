@@ -8,7 +8,7 @@
 #include "datastructs.h"
 
 bool manageCommands(Command * cmds);
-bool exec_external_commands(Command * cmd);
+void exec_external_commands(Command * cmd, bool * errno);
 bool exec_internal_commands(Command * cmd);
 
 /**

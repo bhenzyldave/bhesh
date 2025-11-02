@@ -61,13 +61,13 @@ bool getCommands(Shell *shell, Command *cmds)
     }
 
     // DEBUG
-    printf("%s\n", (char *)cmds->head);
-    printf("%d\n", cmds->head_length);
+    // printf("%s\n", (char *)cmds->head);
+    // printf("%d\n", cmds->head_length);
 
     // DEBUG
-    if (cmds->body != NULL)
-        printf("%s\n", cmds->body[0]);
-    printf("%d\n", cmds->body_size);
+    // if (cmds->body != NULL)
+    //    printf("%s\n", cmds->body[0]);
+    // printf("%d\n", cmds->body_size);
 
     return true;
 }

@@ -92,6 +92,7 @@ int Shell_run(Shell *self)
             errno = true;
         }
 
+        // Clean up allocated commands
         for (int n = 0; n < cmds->body_size; n++)
         {
             free(cmds->body[n]);
@@ -101,6 +102,7 @@ int Shell_run(Shell *self)
         free(cmds);
     }
 
+    // Clean and exit
     free(self->commands);
     return errno;
 }

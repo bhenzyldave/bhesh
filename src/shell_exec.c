@@ -15,17 +15,19 @@ bool manageCommands(Command *cmds)
 {
     // HANDLE PIPES LATER
 
-    // Sepates the command type
+    // Checks if the command is external
     if (get_exec_type(cmds->head))
     {
         return exec_internal_commands(cmds);
     }
 
+    // Run internal commands
     bool errno = true;
     exec_external_commands(cmds, &errno);
     return errno;
 }
 
+// Function: exec_external_commands
 void exec_external_commands(Command *cmd, bool * errno)
 {
     pid_t pid = fork();
@@ -38,15 +40,19 @@ void exec_external_commands(Command *cmd, bool * errno)
 
     if (pid == 0)
     {
+        // Size of the command (+2 for head and NULL)
         int size = cmd->body_size + 2;
         char **args = malloc(size * sizeof(char *));
         int n = 1;
 
+        // Attach head at the beginning
         args[0] = malloc((strlen(cmd->head) * sizeof(char)) + 1);
         strcpy(args[0], cmd->head);
 
+        // Attach command arguments
         while (true)
         {
+            // Checks if command body is already attached
             if ((n - 1) == cmd->body_size)
                 break;
 
@@ -55,8 +61,10 @@ void exec_external_commands(Command *cmd, bool * errno)
             n++;
         }
 
+        // Attaches NULL at the end
         args[n] = NULL;
 
+        // Execute the external command and check for errors
         if (execvp(args[0], args) == -1)
         {
             fprintf(stderr, "'%s |-> No such command exists! :(\n", args[0]);
@@ -75,8 +83,10 @@ void exec_external_commands(Command *cmd, bool * errno)
         wait(NULL);
 }
 
+// Function: exec_internal_commands
 bool exec_internal_commands(Command *cmd)
 {
+    // Checks if shell user is trying to exit
     if ((strcmp(cmd->head, "exit") == 0) && (cmd->body_size == 0))
         return false;
 

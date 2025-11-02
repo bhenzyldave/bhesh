@@ -9,51 +9,35 @@
 #include "input.h"
 
 // Function: fetchInput
-// Arguments: double pointer char commands and pointer size_t cmd_size
 bool fetchInput(char **commands, size_t *cmd_size)
 {
-    // Initializes char int value to zero
-    int c = 0;
-
-    // Initializes number of loops, starting zero
-    int i = 0;
+    int c = 0; // Current char int
+    int i = 0; // NUmber of loops
 
     // Loops over stdin and get shell user input starting at char [0]
-    while ((c = getchar()) != '\n' && c != EOF) // Loop if not the end of input, else stop
+    while ((c = getchar()) != '\n' && c != EOF)
     {
-        // If number of loops exceeds number of chars allocated
-        // Exception -1 of cmd_size for null terminator
+        // Checks for buffer overflow and safely resizes it to match buffer size
         if (i >= (*cmd_size) - 1)
         {
-            // Resizes allocated data from Shell_loop() -> self->commands
-            // For extra chars by doubling its size
             char * tmp_commands = realloc(*commands, ((*cmd_size) *= 2));
 
-            // Checks if reallocation failed
             if (tmp_commands == NULL)
             {
-                // Prints error and return false for program failure
                 perror("Failed to allocate commands (input.c) ->");
                 return false;
             }
 
-            // Safely store to self->commands
             *commands = tmp_commands;
-
-            // Continue to check for further overflow
-            continue;
         }
 
-        // Assign block in [i] from stdin char 
-        // And post-increment i
-        (*commands)[i++] = (char)c; // Use of char conversion since c is an int of char
+        (*commands)[i++] = (char)c;
     }
 
-    // If there's an input, assign the last reserved block for null terminator
+    // Adds null terminator at last block
     if (c != 0)
         (*commands)[i] = '\0';
 
-    // Ends program and return true for success
     return true;
 }
 
@@ -63,16 +47,12 @@ void handleCommands(Command cmd)
 }
 
 // Function: getCommands
-Command *getCommands(Shell *shell) // Arguments: struct Shell pointer
+Command *getCommands(Shell *shell)
 {
-    // Declares new Command pointer and assign the
-    // memory address of allocation with its respective size
     Command *cmds = malloc(sizeof(Command));
 
-    // Checks if allocation was successful
     if (cmds == NULL)
     {
-        // Print the error and return NULL for erorr
         perror("Failed to getCommandHead or getCommandBody (input.c) ->");
         return NULL;
     }
@@ -80,64 +60,46 @@ Command *getCommands(Shell *shell) // Arguments: struct Shell pointer
     // Initializes the new struct correspondingly
     cmds->args = NULL;
     cmds->args_size = 0;
-    cmds->target = NULL;
+    cmds->head = NULL;
     cmds->target_size = 0;
 
-    // Calls getCommandHead and assigns to gT
-    // For checking errors
-    bool gT = getCommandHead(shell, cmds); // Get target command
-
-    // Checks if there are any errors
-    if (!gT)
+    // Get the command head (head)
+    if (!getCommandHead(shell, cmds))
     {
-        // Prints error. free the allocated Command struct, 
-        // and return NULL for error
         perror("Failed to getCommandHead (input.c) ->");
         free(cmds);
         return NULL;
     }
 
-    printf("%s\n", (char *)cmds->target);
+    // DEBUG
+    printf("%s\n", (char *)cmds->head);
     printf("%d\n", cmds->target_size);
 
-    // Calls getCommandBody and assigns to gA
-    // For checking errors
-    bool gA = getCommandBody(shell, cmds); // Get command arguments
-
-    // Checks if there are any errors
-    if (!gA)
+    // Get the command body (args)
+    if (!getCommandBody(shell, cmds))
     {
-        // Prints error. free the allocated Command struct, 
-        // and return NULL for error
         perror("Failed to getCommandBody (input.c) ->");
         free(cmds);
         return NULL;
     }
 
+    // DEBUG
     if (cmds->args != NULL)
         printf("%s\n", cmds->args[0]);
-
     printf("%d\n", cmds->args_size);
 
-    // End function and return new Struct
     return cmds;
 }
 
 // Function: getCommandHead
-// Arguments: struct Shell pointer and struct cmd pointer
 bool getCommandHead(Shell *shell, Command *cmd)
 {
-    // Assigns target_size as initially 64 chars
     int target_size = 64 * sizeof(char);
-    
-    // Allocates initial target and assign to Command
-    cmd->target = malloc(target_size);
+    cmd->head = malloc(target_size);
 
-    // Checks if the allocation failed
-    if (cmd->target == NULL)
+    if (cmd->head == NULL)
     {
-        // Prints error and return false for failure
-        perror("Failed to allocate cmd->target (input.c) ->");
+        perror("Failed to allocate cmd->head (input.c) ->");
         return false;
     }
     
@@ -164,11 +126,11 @@ bool getCommandHead(Shell *shell, Command *cmd)
             /// If end is whitespace and letter is not yet found
             if (c == ' ' && !letterFound)
             {
-                j++; // Increment j as for next char
-                continue; // Skips current loop to avoid allocating whitespaces
+                j++;
+                continue;
             }
 
-            // Else break (end of target)
+            // Else break (end of head)
             break;
         }
 
@@ -176,54 +138,44 @@ bool getCommandHead(Shell *shell, Command *cmd)
         if (i >= target_size - 1)
         {
             // Safely reallocates new size by doubling space for new chars
-            char * tmp_target = realloc(cmd->target, sizeof(char) * (target_size *= 2));
+            char * tmp_target = realloc(cmd->head, sizeof(char) * (target_size *= 2));
 
-            // Checks if allocation failed
             if (tmp_target == NULL)
             {
-                // Print serror, free the allocated atrget, and return false for error
-                perror("Failed to re-allocate cmd->target (input.c) ->");
-                free(cmd->target);
+                perror("Failed to re-allocate cmd->head (input.c) ->");
+                free(cmd->head);
                 return false;
             }
 
             // Assigns allocated space address to main variable
-            cmd->target = tmp_target;
-            continue; // Skip sfor possible overflow checking
+            cmd->head = tmp_target;
         }
 
-        cmd->target[i++] = c; // Assigns char space to current character
-        letterFound = true; // Assigns true for letter is found proof after endline checks
+        cmd->head[i++] = c;
+        letterFound = true; // Assigns true for letter is found, proof after endline checks
         j++; // Increments for next character
     }
 
     // Assign last reserved space for null terminal
-    cmd->target[i] = '\0';
+    cmd->head[i] = '\0';
 
-    // Assign j as target size with additional pre-increment as j starts from 0
+    // Assign j as head size with additional pre-increment as j starts from 0
     cmd->target_size = ++j;
 
-    return true; // Ends function, return true for success
+    return true;
 }
 
 // Function: getCommandBody
-// Arguments: struct Shell pointer and struct Command pointer
 bool getCommandBody(Shell *shell, Command *cmd)
 {
-    // Initializes current c with target size to skip target
     int curr_c = cmd->target_size;
-    // Declares function variable current char of input
     char tmp_c = shell->commands[curr_c];
 
-    // If char is end, return true for successful
-    // Result: command had no argument
+    // Checks for no body
     if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
         return true;
 
-    // Starts from 1 arg (assumption)
     int argsSize = 1;
-
-    // Allocates space for first arg
     cmd->args = malloc(sizeof(char *) * argsSize);
 
     // Assigns number of loops
@@ -235,7 +187,6 @@ bool getCommandBody(Shell *shell, Command *cmd)
         // Updates current char for i > 0 for current arg
         tmp_c = shell->commands[curr_c];
 
-        // If whitespace
         if (tmp_c == ' ')
         {
             // Skips for next argument
@@ -247,16 +198,13 @@ bool getCommandBody(Shell *shell, Command *cmd)
         if (tmp_c == '\n' || tmp_c == '\0' || !tmp_c)
             break;
 
-        // If numeber of loops is equal to argsSize
         if (i == argsSize)
         {
             // Safely resizes allocated arg by +1 (Add new arg to the array)
             char ** tmp_args = realloc(cmd->args, (++argsSize) * sizeof(char *));
 
-            // Checks if allocation was successful
             if (tmp_args == NULL)
             {
-                // Prints error
                 perror("Failed to re-allocate cmd->args (input.c) ->");
 
                 // Cleans
@@ -264,18 +212,14 @@ bool getCommandBody(Shell *shell, Command *cmd)
                 return false;
             }
 
-            // If successful, assigns to main variable the new memory allocated space
             cmd->args = tmp_args;
         }
 
-        // Assigns current arg string size 32 chars and allocate
         int tmp_size = 32 * sizeof(char);
         char *tmp = malloc(tmp_size);
 
-        // Checks if allocation was successful
         if (tmp == NULL)
         {
-            // Prints error
             perror("Failed to allocate tmp (input.c) ->");
 
             // Clean
@@ -295,10 +239,8 @@ bool getCommandBody(Shell *shell, Command *cmd)
                 // Doubles allocation size and store safely
                 char * tmp_tmp = realloc(tmp, sizeof(char) * (tmp_size *= 2));
 
-                // Checks if allocation succeeded
                 if (tmp_tmp == NULL)
                 {
-                    // Prints error
                     perror("Failed to re-allocate tmp (input.c) ->");
 
                     // Clean
@@ -306,9 +248,7 @@ bool getCommandBody(Shell *shell, Command *cmd)
                     return false;
                 }
 
-                // Replaces main to new allocated address
                 tmp = tmp_tmp;
-                continue; // Skips for possible overflow checks
             }
 
             // Update current char with post-increment for next char
@@ -331,12 +271,11 @@ bool getCommandBody(Shell *shell, Command *cmd)
 
     // Assign args_size
     cmd->args_size = argsSize;
-    return true; // Ends function, returns true for successful
+    return true;
 }
 
 // Function: isShellCommand
-// Argument: target string
-bool isShellCommand(char *target)
+bool isShellCommand(char *head)
 {
     // Maintainer Note: Add more commands later
 
@@ -349,7 +288,7 @@ bool isShellCommand(char *target)
     for (int i = 0; i < 3; i++)
     {
         // If it matches command, return true
-        if (strcmp(shellCmdTargets[i], target) == 0)
+        if (strcmp(shellCmdTargets[i], head) == 0)
             return true;
     }
 

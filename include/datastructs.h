@@ -4,18 +4,18 @@
     Defines a struct named Command 
     with the following data:
 
-        - target -> This data represents the pointer
-        of the memory allocated string of the target
+        - head -> This data represents the pointer
+        of the memory allocated string of the head
         main command. Such as for instance:
 
             ~ >command arg1 arg2
 
-            target = command which represents the main call.
-            Where: target is a string
+            head = command which represents the main call.
+            Where: head is a string
 
         - target_size -> Due to logical reasons,
         this variable acts as a pointer to the previous
-        last char or the length of target (strlen(target))
+        last char or the length of head (strlen(head))
         to be used on excluding the main command as argument.
 
         - args -> This represents as an array of strings where
@@ -27,7 +27,7 @@
 */
 typedef struct
 {
-    char * target;
+    char * head;
     int target_size;
 
     char ** args;

@@ -20,7 +20,7 @@ bool fetchInput(char ** commands, size_t * cmd_size);
     as main argument from datastructs.h -> Shell.
 
     Usage: To get the commands from the shell user input
-    such as: target as main command and args as the arguments
+    such as: head as main command and args as the arguments
     of the commands (More information about it on input.c -> getCommands())
 */
 Command * getCommands(Shell * shell);
@@ -35,20 +35,20 @@ void handleCommands(Command cmd);
 
 /*
     Declares function: isShellCommand with a pointer of 
-    target as main argument.
+    head as main argument.
 
     Usage: Returns a value true if the main command
     is a shell built-in command, else false. This
     function is used to differentiate built-in shell
     commands and external commands.
 */
-bool isShellCommand(char * target);
+bool isShellCommand(char * head);
 
 /*
     Declares function: getCommandHead with struct Shell
     and struct Command as aguments.
 
-    Usage: To get the main command (target).
+    Usage: To get the main command (head).
     (More information about it on input.c -> getCommandHead())
 */
 bool getCommandHead(Shell * shell, Command * cmd);

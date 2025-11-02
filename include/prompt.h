@@ -5,7 +5,7 @@
 #include "datastructs.h"
 
 /*
-    Declares function: printInterface with promptInitial,
+    Declares function: printInterface with shell_indicator,
     struct Shell, c1 and c2 as arguments.
 
         - shell_indicator -> Represents the shell interface

@@ -11,13 +11,11 @@
 // MAIN
 int main()
 {
-    // New Shell
     Shell shell;
 
     // Initialize shell
     int r1 = Shell_init(&shell);
 
-    // Checks if error occurred
     if (r1) return 1;
     
     // Starts shell loop

@@ -13,52 +13,38 @@
 #include "constants.h"
 
 // Function: Shell_init
-int Shell_init(Shell *self) // Arguments: struct Shell pointer
+int Shell_init(Shell *self)
 {
 
-
-#if defined(_WIN32) || defined(_WIN64) // If defined as a Window Platform, use ENV: HOMEDRIVER
-
-    self->home_dir = getenv("HOMEDRIVER"); // Assigns the HOME path for Windows
-
-    // Note: We use same "HOME" for Mac and Linux, Reason: UNIX Systems
-
-#elif defined(__linux__) // if defined as Linux Platform, use ENV: HOME
-
-    self->home_dir = getenv("HOME"); // Assigns the HOME path for Linux
-
-#elif defined(__APPLE__) && define(__MACH__) // if defined as MAC OS Platform, use ENV: HOME
-
-    self->home_dir = getenv("HOME"); // Assigns the HOME path for MacOS
-
+// Fetches homepath directory
+#if defined(_WIN32) || defined(_WIN64)
+    self->home_dir = getenv("HOMEDRIVE");
+#elif defined(__linux__) || defined(__APPLE__) && defined(__MACH__)
+    self->home_dir = getenv("HOME");
 #else
-
     // if OS is unknown bhesh may not work properly unless modified
     perror("Unknown operating system!\n");
     return 1;
 
 #endif
 
-    chdir(&*self->home_dir); // Sets the current directory as HOME path
-    printInterface(SHELL_INDICATOR, self, C_1, C_2); // Initially display shell
+    chdir(&*self->home_dir);
+    printInterface(SHELL_INDICATOR, self, C_1, C_2);
 
-    return 0; // Ends the initialization on function: Shell_init()
+    return 0;
 }
 
 // Function: Shell_loop
-int Shell_loop(Shell *self) // Argument: struct Shell pointer
+int Shell_loop(Shell *self) 
 {
-    // Initially defines the current command size as 64 chars
     size_t curr_command_size = 64 * sizeof(char); 
 
     /* Allocates a space for command data and
      stores it to the struct Shell -> string commands */
     self->commands = malloc(curr_command_size);
     
-    // Checks if the allocation failed
     if (self->commands == NULL)
     {
-        // Prints the error and returns 1 for error
         perror("Failed to allocate self->commands (bhesh.c) ->");
         return 1;
     }
@@ -75,20 +61,15 @@ int Shell_loop(Shell *self) // Argument: struct Shell pointer
         */
         bool fetchResult = fetchInput(&self->commands, &curr_command_size);
 
-        // Checks for error, Returns 1 if there are any
         if (!fetchResult)
             return 1;
 
         /* 
-            Get shell user commands as: target (main command)
+            Get shell user commands as: head (main command)
             and args (command arguments)
         */
         Command *cmds = getCommands(self);
 
-        /*
-            Checks if result is NULL (Generally, Allocation issues),
-            Returns 1 for error
-        */
         if (cmds == NULL)
             return 1;
 
@@ -96,11 +77,11 @@ int Shell_loop(Shell *self) // Argument: struct Shell pointer
         printInterface(SHELL_INDICATOR, self, C_1, C_2);
     }
 
-    return 0; // Ends Shell_loop function
+    return 0;
 }
 
 // Function: Shell_cleanup
-void Shell_cleanup(Shell *self) // Arguments: struct Shell pointer
+void Shell_cleanup(Shell *self)
 {
     // Free the memory allocated data
     free(self->commands);

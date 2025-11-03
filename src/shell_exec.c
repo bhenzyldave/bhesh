@@ -139,7 +139,7 @@ bool exec_internal_commands(Command *cmd, bool *err_status, Shell *shell)
     }
 
     // Initializes built-in shell commands
-    int command_size = 5;
+    int command_size = 4;
     char *shellCmdTargets[] = {
         "bhesh",
         "cd",
@@ -276,7 +276,7 @@ bool exec_internal_commands(Command *cmd, bool *err_status, Shell *shell)
         {
             if (shell->exports_size > 0)
             {
-                
+
             }
         }
 

@@ -88,7 +88,7 @@ int Shell_run(Shell *self)
         */
 
         // Execute processed chronologically and check once
-        if (!getCommands(self, cmds) || !manageCommands(cmds, self->home_dir) // Execute the commands
+        if (!getCommands(self, cmds) || !manageCommands(cmds, self) // Execute the commands
             || !printInterface(SHELL_INDICATOR, self, C_1, C_2))              // Updates the shell interface
         {
             err_status = true;

@@ -40,6 +40,8 @@ typedef struct
 {
     char *home_dir; /**< Pointer to the current directory string. (Not allocated) */
     char *commands; /**< Pointer to the user's input commands. (Allocated) */
+    char ** exports; /**< Array of pointer to the exports made by user */
+    int exports_size; /**< Size of exports */
 } Shell;
 
 #endif

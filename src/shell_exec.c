@@ -15,7 +15,7 @@
 #include "utilities.h"
 
 // Function: manageCommands
-bool manageCommands(Command *cmds, char *homedir)
+bool manageCommands(Command *cmds, Shell *shell)
 {
     // HANDLE PIPES LATER
 
@@ -24,7 +24,7 @@ bool manageCommands(Command *cmds, char *homedir)
     if (cmds->head_length > 0)
     {
         // Checks if the command is external
-        if (!exec_internal_commands(cmds, &err_status, homedir))
+        if (!exec_internal_commands(cmds, &err_status, shell))
         {
             // Run internal commands
             exec_external_commands(cmds, &err_status);
@@ -129,7 +129,7 @@ void exec_external_commands(Command *cmd, bool *err_status)
 }
 
 // Function: exec_internal_commands
-bool exec_internal_commands(Command *cmd, bool *err_status, char *homedir)
+bool exec_internal_commands(Command *cmd, bool *err_status, Shell *shell)
 {
     // Checks if shell user is trying to exit
     if ((strcmp(cmd->head, "exit") == 0) && (cmd->body_size == 0))
@@ -144,8 +144,8 @@ bool exec_internal_commands(Command *cmd, bool *err_status, char *homedir)
         "bhesh",
         "cd",
         "pwd",
-        "set",
-        "unset"};
+        "export",
+    };
 
     int command = 0;
 
@@ -181,8 +181,8 @@ bool exec_internal_commands(Command *cmd, bool *err_status, char *homedir)
             {
                 if (strcmp(cmd->body[0], "~") == 0)
                 {
-                    chdir(homedir);
-                    setenv("PWD", homedir, 1);
+                    chdir(shell->home_dir);
+                    setenv("PWD", shell->home_dir, 1);
                     break;
                 }
 
@@ -270,8 +270,15 @@ bool exec_internal_commands(Command *cmd, bool *err_status, char *homedir)
         printf("Physical Directory: %s\n", cwd);
         free(cwd);
         break;
-    // set
+    // export
     case 4:
+        if (cmd->body_size > 0)
+        {
+            if (shell->exports_size > 0)
+            {
+                
+            }
+        }
 
         break;
     // unset

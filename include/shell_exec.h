@@ -7,8 +7,8 @@
 // Included Headers
 #include "datastructs.h"
 
-bool manageCommands(Command * cmds, char * homedir);
-bool exec_internal_commands(Command * cmd, bool * err_status, char * homedir);
+bool manageCommands(Command * cmds, Shell * shell);
+bool exec_internal_commands(Command * cmd, bool * err_status, Shell * shell);
 void exec_external_commands(Command * cmd, bool * err_status);
 
 #endif

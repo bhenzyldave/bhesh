@@ -271,6 +271,5 @@ bool getCommandBody(Shell *shell, Command *cmd)
 
     // Assign body_size
     cmd->body_size = bodySize;
-    printf("'%d'\n", cmd->body_size);
     return true;
 }

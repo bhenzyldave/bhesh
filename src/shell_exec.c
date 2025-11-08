@@ -17,19 +17,11 @@
 // Function: manageCommands
 bool manageCommands(Command *cmds, Shell *shell)
 {
-    // HANDLE PIPES LATER
+    // HANDLE PIPES NOW
 
     bool err_status = true;
 
-    if (cmds->head_length > 0)
-    {
-        // Checks if the command is external
-        if (!exec_internal_commands(cmds, &err_status, shell))
-        {
-            // Run internal commands
-            exec_external_commands(cmds, &err_status);
-        }
-    }
+    createExecList(cmds, shell);
 
     return err_status;
 }
@@ -273,14 +265,119 @@ bool exec_internal_commands(Command *cmd, bool *err_status, Shell *shell)
         break;
     // export
     case 4:
+        /*
         if (cmd->body_size > 0)
         {
-            if (shell->exports_size > 0)
+            if (cmd->body_size > 1)
             {
-
+                printf("'%s' -> Too many arguments! >:(\n", cmd->head);
+                break;
             }
+
+            int var_name_length = 2 * sizeof(char);
+            char *var_name = malloc(var_name_length);
+
+            if (var_name == NULL)
+            {
+                perror("\nFailed to allocate var_name (shell_exec.c) ->");
+                *err_status = false;
+                break;
+            }
+
+            int path_length = 2 * sizeof(char);
+            char *path = malloc(path_length);
+
+            if (path == NULL)
+            {
+                perror("\nFailed to allocate path (shell_exec.c) ->");
+                *err_status = false;
+                break;
+            }
+
+            int j = 0;
+            int i = 0;
+            bool isPath = false;
+
+            while (true)
+            {
+                if (cmd->body[0][i] == '\0')
+                    break;
+
+                if (cmd->body[0][i] == '=')
+                {
+                    isPath = true;
+                    i++;
+                    continue;
+                }
+
+                if (!isPath)
+                {
+                    if ((var_name_length - 1) <= i)
+                    {
+                        char *tmp = realloc(var_name, var_name_length *= 2);
+
+                        if (tmp == NULL)
+                        {
+                            perror("\nFailed to re-allocate var_name (shell_exec.c) ->");
+                            *err_status = false;
+                            break;
+                        }
+
+                        var_name = tmp;
+                        continue;
+                    }
+
+                    var_name[i] = cmd->body[0][i];
+                    i++;
+                    continue;
+                }
+
+                if ((path_length - 1) <= j)
+                {
+                    char *tmp = realloc(path, path_length *= 2);
+
+                    if (tmp == NULL)
+                    {
+                        perror("\nFailed to re-allocate path (shell_exec.c) ->");
+                        *err_status = false;
+                        break;
+                    }
+
+                    path = tmp;
+                    continue;
+                }
+
+                path[j] = cmd->body[0][j + i];
+                j++;
+            }
+
+            var_name[++i] = '\0';
+            path[++j] = '\0';
+
+            if (!errno)
+            {
+                free(var_name);
+                free(path);
+                break;
+            }
+
+            if (access(path, F_OK) != 0)
+            {
+                printf("'%s' -> No such file directory! >:(\n", path);
+                free(path);
+                free(var_name);
+                break;
+            }
+
+            setenv(var_name, path, 1);
+            break;
         }
 
+        for (int n = 0; n < shell->exports_size; n++)
+        {
+            printf("    %s\n", shell->exports[n]);
+        }
+        */
         break;
     // unset
     case 5:
@@ -289,7 +386,12 @@ bool exec_internal_commands(Command *cmd, bool *err_status, Shell *shell)
         *err_status = true;
         return false;
         break;
-    }
+    } // More commands will be added later on
 
     return true;
+}
+
+CMD_Node *createExecList(Command *cmds, Shell *shell)
+{
+  
 }

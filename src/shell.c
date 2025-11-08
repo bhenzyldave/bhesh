@@ -13,6 +13,11 @@ int main()
 {
     Shell shell;
 
+    shell.commands = NULL;
+    shell.exports = NULL;
+    shell.exports_size = 0;
+    shell.home_dir = NULL;
+
     // Initialize shell and run
     if (!Shell_init(&shell) || !Shell_run(&shell))
         return 1;

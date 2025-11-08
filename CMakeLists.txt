@@ -9,7 +9,6 @@ set(SOURCES
    src/bhesh.c
    src/input.c
    src/prompt.c
-   src/parser.c
    src/utilities.c
 )
 
